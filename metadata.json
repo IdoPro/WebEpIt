@@ -1,0 +1,5 @@
+{
+  "name": "SiteForge AI",
+  "description": "A powerful platform to generate complete React Vite websites from prototypes using AI, ready for deployment to Vercel and Render.",
+  "requestFramePermissions": []
+}
