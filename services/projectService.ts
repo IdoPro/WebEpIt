@@ -1,11 +1,14 @@
 import axios from 'axios';
 import { SiteConfig } from '@/types';
+import serverIntegrationService from './serverIntegrationService';
 
 export interface DeploymentResponse {
   success: boolean;
   projectId?: string;
   url?: string;
   customDomain?: string;
+  serialNumber?: string;
+  uniqueKey?: string;
   message: string;
   error?: string;
 }
@@ -25,21 +28,57 @@ export const projectService = {
     result: any
   ): Promise<DeploymentResponse> {
     try {
-      const response = await axios.post<DeploymentResponse>(
-        '/api/projects/deploy',
-        {
-          config,
-          result,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
+      // Validate required fields
+      if (!config.email || !config.email.trim()) {
+        return {
+          success: false,
+          message: 'Email address is required to publish the website',
+          error: 'Missing email',
+        };
+      }
+
+      if (!config.projectName || !config.projectName.trim()) {
+        return {
+          success: false,
+          message: 'Project name is required to publish the website',
+          error: 'Missing project name',
+        };
+      }
+
+      // Map SiteConfig to our server's client creation format
+      const websiteData = {
+        clientName: config.projectName || config.deceasedName || 'Unnamed Project',
+        email: config.email.trim(),
+        websiteType: config.prototypeType?.toLowerCase() === 'memorial' ? 'memorial' : 
+                     config.prototypeType?.toLowerCase() === 'portfolio' ? 'portfolio' :
+                     config.prototypeType?.toLowerCase() === 'ecommerce' ? 'business' : 'blog',
+        website: {
+          title: config.projectName || config.deceasedName || 'My Website',
+          description: config.description || 'Created with SiteForg',
+          content: {
+            ...config,
+            generationResult: result,
           },
-        }
+        },
+      };
+
+      // Use the serverIntegrationService to create the website
+      const clientData = await serverIntegrationService.createClientWebsite(
+        websiteData.clientName,
+        websiteData.email,
+        websiteData.websiteType,
+        websiteData.website
       );
 
-      return response.data;
+      return {
+        success: true,
+        projectId: clientData.clientId,
+        serialNumber: clientData.serialNumber,
+        uniqueKey: clientData.uniqueKey,
+        url: clientData.websiteUrl,
+        customDomain: clientData.serialNumber,
+        message: 'Project deployed successfully',
+      };
     } catch (error) {
       console.error('Deployment error:', error);
       
@@ -53,21 +92,24 @@ export const projectService = {
 
       return {
         success: false,
-        message: 'An unexpected error occurred',
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
         error: String(error),
       };
     }
   },
 
   /**
-   * Fetch project details by ID
-   * @param projectId - The project ID
+   * Fetch project details by ID (clientId)
+   * @param clientId - The client/project ID
    * @returns Project data
    */
-  async getProject(projectId: string): Promise<any> {
+  async getProject(clientId: string): Promise<any> {
     try {
-      const response = await axios.get(`/api/projects/${projectId}`);
-      return response.data;
+      const data = await serverIntegrationService.getClientWebsite(clientId);
+      return {
+        success: true,
+        data,
+      };
     } catch (error) {
       console.error('Failed to fetch project:', error);
       throw error;
@@ -75,12 +117,12 @@ export const projectService = {
   },
 
   /**
-   * Delete a project
-   * @param projectId - The project ID
+   * Delete a project (client account)
+   * @param clientId - The client/project ID
    */
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(clientId: string): Promise<void> {
     try {
-      await axios.delete(`/api/projects/${projectId}`);
+      await serverIntegrationService.deleteClientAccount(clientId);
     } catch (error) {
       console.error('Failed to delete project:', error);
       throw error;

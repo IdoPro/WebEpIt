@@ -6,13 +6,21 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
-        port: 3000,
+        port: 5173,
         host: '0.0.0.0',
+        proxy: {
+          '/api': {
+            target: env.VITE_SERVER_URL || 'http://localhost:5000',
+            changeOrigin: true,
+            rewrite: (path) => path,
+          }
+        }
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+        'process.env.SERVER_URL': JSON.stringify(env.VITE_SERVER_URL || 'http://localhost:5000')
       },
       resolve: {
         alias: {

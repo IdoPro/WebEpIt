@@ -26,6 +26,30 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
   const addLog = (msg: string) => setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const handleDeploy = async () => {
+    // Validate required fields for email and project name
+    if (!config.email || !config.email.trim()) {
+      const msg = lang === 'he' ? '❌ חובה למלא אימייל' : '❌ Email address is required';
+      addLog(msg);
+      alert(lang === 'he' ? 'נא למלא את כתובת האימייל שלך' : 'Please fill in your email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(config.email)) {
+      const msg = lang === 'he' ? '❌ אימייל לא תקין' : '❌ Invalid email format';
+      addLog(msg);
+      alert(lang === 'he' ? 'אנא הזן כתובת אימייל חוקית' : 'Please enter a valid email address');
+      return;
+    }
+
+    if (!config.projectName || !config.projectName.trim()) {
+      const msg = lang === 'he' ? '❌ חובה למלא שם פרויקט' : '❌ Project name is required';
+      addLog(msg);
+      alert(lang === 'he' ? 'נא למלא את שם הפרויקט שלך' : 'Please fill in your project name');
+      return;
+    }
+
     setIsDeploying(true);
     addLog(lang === 'he' ? "מתחיל פריסה..." : "Starting deployment...");
 
@@ -41,12 +65,15 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
         instructions: 'Site generated successfully',
       };
 
-      addLog(lang === 'he' ? "שולח נתונים לשרת..." : "Sending data to server...");
+      addLog(lang === 'he' ? "✓ אימות נתונים הצליח" : "✓ Data validation passed");
+      addLog(lang === 'he' ? "📤 שולח את האתר לשרת..." : "📤 Uploading to server...");
       
       const response = await projectService.deployProject(config, result);
 
       if (response.success && response.projectId && response.url) {
+        addLog(lang === 'he' ? "✓ עיבוד שלמה בהצלחה" : "✓ Processing complete");
         addLog(lang === 'he' ? "✅ הפריסה הצליחה!" : "✅ Deployment successful!");
+        addLog(lang === 'he' ? `🌐 הקישור שלך: ${response.url}` : `🌐 Your URL: ${response.url}`);
         setDeploymentData(response);
       } else {
         addLog(lang === 'he' ? "❌ הפריסה נכשלה: " + response.message : "❌ Deployment failed: " + response.message);

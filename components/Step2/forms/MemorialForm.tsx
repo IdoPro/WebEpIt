@@ -31,6 +31,35 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
   };
   return (
     <div className="space-y-6">
+      {/* Contact Information Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
+        <h3 className="text-sm font-bold text-blue-900">
+          {lang === 'he' ? '📧 פרטי יצירת קשר' : '📧 Contact Information'}
+        </h3>
+        
+        <InputField
+          label={lang === 'he' ? 'שם הפרויקט' : 'Project Name'}
+          value={config.projectName ?? ''}
+          onChange={(val) => setConfig({ ...config, projectName: val })}
+          isRtl={isRtl}
+          placeholder={lang === 'he' ? 'זכרון אבא' : 'E.g., Memorial for Dad'}
+        />
+        
+        <InputField
+          label={lang === 'he' ? 'אימייל' : 'Email Address'}
+          value={config.email ?? ''}
+          onChange={(val) => setConfig({ ...config, email: val })}
+          isRtl={isRtl}
+          placeholder={lang === 'he' ? 'your@email.com' : 'your@email.com'}
+          type="email"
+        />
+        
+        <p className="text-xs text-blue-700 italic">
+          {lang === 'he' 
+            ? '✓ נשתמש באימייל זה כדי לשמור על ההרשאות שלך ולשלוח עדכונים חשובים'
+            : '✓ We\'ll use this email to save your site access and send important updates'}
+        </p>
+      </div>
 
       <InputField
         label="שם הנפטר"

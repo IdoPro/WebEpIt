@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Prototype } from '../constants';
-import { Language } from '../types';
+import { PROTOTYPES, Prototype } from '@/constants';
+import { Language } from '@/types';
 
 interface PrototypeCardProps {
   prototype: Prototype;

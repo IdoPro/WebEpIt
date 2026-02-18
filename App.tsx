@@ -78,7 +78,7 @@ const App: React.FC = () => {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-none">SiteForge <span className="text-indigo-600">AI</span></h1>
+              <h1 className="text-xl font-bold text-slate-900 leading-none">WebEpit <span className="text-indigo-600">AI</span></h1>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Enterprise Builder</p>
             </div>
           </div>
@@ -113,7 +113,7 @@ const App: React.FC = () => {
 
       <footer className="mt-auto py-12 border-t border-slate-200 text-center bg-white">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 text-sm font-medium">© 2024 SiteForge AI. Build. Deploy. Scale.</p>
+          <p className="text-slate-400 text-sm font-medium">© 2024 WebEpit AI. Build. Deploy. Scale.</p>
           <div className="flex gap-8">
             <a href="#" className="text-slate-400 hover:text-indigo-600 text-xs font-bold uppercase tracking-widest">Docs</a>
             <a href="#" className="text-slate-400 hover:text-indigo-600 text-xs font-bold uppercase tracking-widest">Render Guide</a>

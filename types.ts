@@ -12,6 +12,8 @@ export enum PrototypeType {
 
 export interface SiteConfig {
   name: string;
+  projectName?: string;
+  email?: string;
   prototype: PrototypeType;
   primaryColor: string;
   secondaryColor: string;
@@ -21,6 +23,7 @@ export interface SiteConfig {
   backblazeKey?: string;
   contactEmail: string;
   language: Language;
+  prototypeType?: string;
   // Memorial Specific Fields
   deceasedName?: string;
   dateOfPassing?: string;
