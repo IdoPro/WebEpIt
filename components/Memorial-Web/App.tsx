@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Memory, SectionType, Reply } from './types';
 import { Language } from '@/types';
-import { APP_NAME, DECEASED_NAME, YEARS_LIFE, HEBREW_YEARS, MOTTO, ACTS_OF_LIGHT } from './constants';
+import { DECEASED_NAME } from './constants';
 import MemoryCard from './components/MemoryCard';
 import JewishSection from './components/JewishSection';
 import { Flame, Heart, MessageSquare, Book, User, PlusCircle, Sparkles, Send, Quote, Star, Gift, Handshake, CheckCircle2, Users, ArrowRight } from 'lucide-react';
@@ -33,6 +33,12 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
   const [newMemory, setNewMemory] = useState({ author: '', relation: '', content: '' });
   const [aiKeywords, setAiKeywords] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const theme = {
+    primary: config?.primaryColor || '#2c3e50',
+    secondary: config?.secondaryColor || '#ffffff',
+    accent: config?.accentColor || '#f59e0b',
+  };
 
   // Fetch data from API on mount
   useEffect(() => {
@@ -159,21 +165,21 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-serif-hebrew overflow-x-hidden scroll-smooth text-slate-900">
+    <div className="min-h-screen flex flex-col font-serif-hebrew overflow-x-hidden scroll-smooth text-slate-900" style={{ backgroundColor: theme.secondary }}>
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm" style={{ borderColor: `${theme.primary}22` }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveSection(SectionType.HOME)}>
-            <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center shadow-lg">
-              <Flame className="w-4 h-4 text-amber-400" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: theme.primary }}>
+              <Flame className="w-4 h-4" style={{ color: theme.accent }} />
             </div>
             <span className="font-bold text-slate-900 text-sm md:text-base">לזכרו של {ensureZL(((config?.deceasedName || DECEASED_NAME).split(' ')[0]))}</span>
           </div>
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar font-sans-hebrew py-1">
-            <button onClick={() => setActiveSection(SectionType.HOME)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.HOME ? 'text-slate-900 border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-800'}`}>בית</button>
-            <button onClick={() => setActiveSection(SectionType.BIO)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.BIO ? 'text-slate-900 border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-800'}`}>סיפור חיים</button>
-            <button onClick={() => setActiveSection(SectionType.MEMORIES)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.MEMORIES ? 'text-slate-900 border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-800'}`}>זכרונות</button>
-            <button onClick={() => setActiveSection(SectionType.JUDAISM)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.JUDAISM ? 'text-slate-900 border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-800'}`}>לעילוי נשמה</button>
+            <button onClick={() => setActiveSection(SectionType.HOME)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.HOME ? 'text-slate-900 border-b-2' : 'text-slate-500 hover:text-slate-800'}`} style={activeSection === SectionType.HOME ? { borderColor: theme.accent } : undefined}>בית</button>
+            <button onClick={() => setActiveSection(SectionType.BIO)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.BIO ? 'text-slate-900 border-b-2' : 'text-slate-500 hover:text-slate-800'}`} style={activeSection === SectionType.BIO ? { borderColor: theme.accent } : undefined}>סיפור חיים</button>
+            <button onClick={() => setActiveSection(SectionType.MEMORIES)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.MEMORIES ? 'text-slate-900 border-b-2' : 'text-slate-500 hover:text-slate-800'}`} style={activeSection === SectionType.MEMORIES ? { borderColor: theme.accent } : undefined}>זכרונות</button>
+            <button onClick={() => setActiveSection(SectionType.JUDAISM)} className={`text-xs md:text-sm font-medium whitespace-nowrap px-1 py-1 transition-all ${activeSection === SectionType.JUDAISM ? 'text-slate-900 border-b-2' : 'text-slate-500 hover:text-slate-800'}`} style={activeSection === SectionType.JUDAISM ? { borderColor: theme.accent } : undefined}>לעילוי נשמה</button>
           </div>
         </div>
       </nav>
@@ -191,11 +197,12 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
               onNavigate={setActiveSection}
               getIcon={getIcon}
               config={config}
+              theme={theme}
             />          </>
         )}
 
         {activeSection === SectionType.BIO && (
-          <BioSection config={config} />
+          <BioSection config={config} theme={theme} />
         )}
 
         {activeSection === SectionType.MEMORIES && (
@@ -291,7 +298,7 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
         {activeSection === SectionType.JUDAISM && <JewishSection config={config} />}
       </main>
 
-      <footer className="bg-slate-950 text-slate-400 py-12 md:py-20 border-t border-white/5 mt-auto">
+      <footer className="text-slate-400 py-12 md:py-20 border-t mt-auto" style={{ backgroundColor: theme.primary, borderColor: `${theme.accent}22` }}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center text-center md:text-right font-sans-hebrew">
             <div className="space-y-3 font-serif-hebrew">

@@ -3,6 +3,33 @@ import { SiteConfig, Language, Milestone } from '@/types';
 import { APP_NAME, DECEASED_NAME, YEARS_LIFE, HEBREW_YEARS, MOTTO } from '@/components/Memorial-Web/constants';
 import InputField from '@/components/Step2/components/GenericInputField';
 
+const CONCEPT_PALETTES = [
+  {
+    key: 'זיכרון קלאסי',
+    primaryColor: '#2c3e50',
+    secondaryColor: '#ffffff',
+    accentColor: '#f59e0b',
+  },
+  {
+    key: 'אבן ושלווה',
+    primaryColor: '#475569',
+    secondaryColor: '#f8fafc',
+    accentColor: '#8b6f47',
+  },
+  {
+    key: 'אור רך',
+    primaryColor: '#6b5b95',
+    secondaryColor: '#fdfbf7',
+    accentColor: '#fbbf24',
+  },
+  {
+    key: 'שקד ועדינות',
+    primaryColor: '#78716c',
+    secondaryColor: '#fff7ed',
+    accentColor: '#d97706',
+  },
+];
+
 interface MemorialFormProps {
   lang: Language;
   config: SiteConfig;
@@ -12,6 +39,13 @@ interface MemorialFormProps {
 const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) => {
   const isRtl = lang === 'he';
   const [newMilestone, setNewMilestone] = useState<Milestone>({ year: '', title: '', description: '' });
+
+  const selectedConcept = CONCEPT_PALETTES.find(
+    (palette) =>
+      palette.primaryColor === config.primaryColor &&
+      palette.secondaryColor === config.secondaryColor &&
+      palette.accentColor === (config.accentColor || '#f59e0b')
+  )?.key;
   
   console.log('Rendering MemorialForm with config:', config);
 
@@ -88,6 +122,78 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
         onChange={(val) => setConfig({ ...config, motto: val })}
         isRtl={isRtl}
       />
+
+      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-4">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900">{lang === 'he' ? '🎨 קונספט' : '🎨 Concept'}</h3>
+          <p className="text-xs text-slate-500 mt-1">
+            {lang === 'he' ? 'בחרו פלטת צבעים לאתר או התאימו ידנית' : 'Pick a site palette or customize manually'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {CONCEPT_PALETTES.map((palette) => {
+            const isSelected = selectedConcept === palette.key;
+            return (
+              <button
+                key={palette.key}
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    concept: palette.key,
+                    primaryColor: palette.primaryColor,
+                    secondaryColor: palette.secondaryColor,
+                    accentColor: palette.accentColor,
+                  })
+                }
+                className={`p-3 rounded-xl border text-right transition-all ${
+                  isSelected ? 'border-slate-900 ring-2 ring-slate-200' : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="text-xs font-bold text-slate-800 mb-2">{palette.key}</div>
+                <div className="flex gap-2">
+                  <span className="w-6 h-6 rounded-full border border-slate-200" style={{ backgroundColor: palette.primaryColor }} />
+                  <span className="w-6 h-6 rounded-full border border-slate-200" style={{ backgroundColor: palette.secondaryColor }} />
+                  <span className="w-6 h-6 rounded-full border border-slate-200" style={{ backgroundColor: palette.accentColor }} />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+            {lang === 'he' ? 'ראשי' : 'Primary'}
+            <input
+              type="color"
+              value={config.primaryColor || '#2c3e50'}
+              onChange={(e) => setConfig({ ...config, concept: lang === 'he' ? 'מותאם אישית' : 'Custom', primaryColor: e.target.value })}
+              className="w-10 h-8 p-0 border-0 bg-transparent cursor-pointer"
+            />
+          </label>
+
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+            {lang === 'he' ? 'רקע' : 'Background'}
+            <input
+              type="color"
+              value={config.secondaryColor || '#ffffff'}
+              onChange={(e) => setConfig({ ...config, concept: lang === 'he' ? 'מותאם אישית' : 'Custom', secondaryColor: e.target.value })}
+              className="w-10 h-8 p-0 border-0 bg-transparent cursor-pointer"
+            />
+          </label>
+
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+            {lang === 'he' ? 'הדגשה' : 'Accent'}
+            <input
+              type="color"
+              value={config.accentColor || '#f59e0b'}
+              onChange={(e) => setConfig({ ...config, concept: lang === 'he' ? 'מותאם אישית' : 'Custom', accentColor: e.target.value })}
+              className="w-10 h-8 p-0 border-0 bg-transparent cursor-pointer"
+            />
+          </label>
+        </div>
+      </div>
 
       {/* Memorial Image */}
       <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">

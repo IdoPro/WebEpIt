@@ -65,6 +65,8 @@ router.post('/deploy', (req: Request, res: Response) => {
         // Colors & Design
         primaryColor: config.primaryColor || '#000000',
         secondaryColor: config.secondaryColor || '#ffffff',
+        accentColor: config.accentColor || '#f59e0b',
+        concept: config.concept || '',
         
         // Memorial Specific Fields
         deceasedName: config.deceasedName || '',

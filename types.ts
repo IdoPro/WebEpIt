@@ -17,6 +17,8 @@ export interface SiteConfig {
   prototype: PrototypeType;
   primaryColor: string;
   secondaryColor: string;
+  accentColor?: string;
+  concept?: string;
   description: string;
   features: string[];
   mongodbUri?: string;

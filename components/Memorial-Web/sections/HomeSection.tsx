@@ -16,6 +16,11 @@ interface Props {
   onNavigate: (s: SectionType) => void;
   getIcon: (name: string) => ReactNode;
   config?: any;
+  theme: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
 }
 
 const HomeSection: React.FC<Props> = ({
@@ -27,23 +32,25 @@ const HomeSection: React.FC<Props> = ({
   onTakeAct,
   onNavigate,
   getIcon,
-  config
+  config,
+  theme
 }) => {
   return (
     <>
       {/* HERO */}
-      <section className="relative h-[80vh] flex items-center justify-center bg-slate-900 text-white">
+      <section className="relative h-[80vh] flex items-center justify-center text-white" style={{ backgroundColor: theme.primary }}>
         <div className="text-center z-10">
           <h1 className="text-5xl font-bold mb-4">{ensureZL(config?.deceasedName || DECEASED_NAME)}</h1>
-          <p className="text-xl text-amber-200">{config?.yearsLife || YEARS_LIFE}</p>
-          <p className="text-sm tracking-widest text-amber-300">{config?.hebrewYears || HEBREW_YEARS}</p>
+          <p className="text-xl" style={{ color: theme.accent }}>{config?.yearsLife || YEARS_LIFE}</p>
+          <p className="text-sm tracking-widest" style={{ color: theme.accent }}>{config?.hebrewYears || HEBREW_YEARS}</p>
 
           <div
             onClick={onLightCandle}
             className={`mt-10 mx-auto w-28 h-28 rounded-full flex items-center justify-center cursor-pointer border-2 transition-all
-              ${isCandleLit ? 'border-amber-400 shadow-[0_0_60px_rgba(251,191,36,.6)]' : 'border-white/20'}`}
+              ${isCandleLit ? 'shadow-[0_0_60px_rgba(251,191,36,.6)]' : 'border-white/20'}`}
+            style={{ borderColor: isCandleLit ? theme.accent : undefined }}
           >
-            <Flame className={`w-14 h-14 ${isCandleLit ? 'text-amber-400' : 'text-white/20'}`} />
+            <Flame className={`w-14 h-14 ${isCandleLit ? 'text-white' : 'text-white/20'}`} style={{ color: isCandleLit ? theme.accent : undefined }} />
           </div>
 
           <p className="mt-4 text-sm text-slate-300">
@@ -57,27 +64,28 @@ const HomeSection: React.FC<Props> = ({
         <div className="flex flex-col-reverse lg:flex-row gap-12 lg:gap-20 items-center">
 
           <div className="lg:w-3/5 text-right flex flex-col justify-center animate-fadeInLeft">
-            <div className="flex items-center gap-2 text-amber-600 mb-6 font-sans-hebrew">
+            <div className="flex items-center gap-2 mb-6 font-sans-hebrew" style={{ color: theme.accent }}>
               <Star className="w-5 h-5 fill-current" />
               <span className="text-[11px] font-black tracking-widest uppercase">האדם שבלבנו</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">איש של אור, חיוך ואהבה</h2>
-            <div className="w-20 h-1.5 bg-amber-500 rounded-full mb-10"></div>
+            <div className="w-20 h-1.5 rounded-full mb-10" style={{ backgroundColor: theme.accent }}></div>
             <p className="text-base md:text-xl text-slate-700 leading-relaxed font-normal mb-10 max-w-2xl">
               {ensureZL(config?.deceasedName || DECEASED_NAME)} היה אדם שהשאיר חותם בכל מקום אליו הגיע. הוא האמין שחיוך פשוט יכול לשנות יום שלם של אדם אחר, והשאיר אחריו מורשת של רעות שתישאר איתנו תמיד.
             </p>
 
-            <div className="bg-amber-50/50 p-8 md:p-10 rounded-3xl border-r-4 border-amber-400 italic mb-10 relative">
-              <Quote className="absolute top-4 left-4 w-12 h-12 text-amber-200 opacity-30" />
+            <div className="p-8 md:p-10 rounded-3xl border-r-4 italic mb-10 relative" style={{ backgroundColor: `${theme.accent}1A`, borderColor: theme.accent }}>
+              <Quote className="absolute top-4 left-4 w-12 h-12 opacity-30" style={{ color: theme.accent }} />
               <p className="text-base md:text-xl text-slate-800 font-medium leading-relaxed relative z-10">
-                "{MOTTO.replace(/״|״/g, '')}"
+                "{(config?.motto || MOTTO).replace(/״|״/g, '')}"
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4 font-sans-hebrew">
               <button
                 onClick={() => onNavigate(SectionType.BIO)}
-                className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-xs md:text-base hover:bg-slate-800 transition-all flex items-center gap-3 shadow-xl active:scale-95"
+                className="text-white px-8 py-4 rounded-2xl font-bold text-xs md:text-base transition-all flex items-center gap-3 shadow-xl active:scale-95"
+                style={{ backgroundColor: theme.primary }}
               >
                 לסיפור חייו המלא <ArrowRight className="w-5 h-5 rotate-180" />
               </button>
@@ -108,7 +116,7 @@ const HomeSection: React.FC<Props> = ({
       </section>
 
       {/* ACTS */}
-      <section className="bg-slate-50 py-24">
+      <section className="py-24" style={{ backgroundColor: theme.secondary }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
           {ACTS_OF_LIGHT.map(act => {
             const taken = userCommitments.has(act.id);
@@ -117,10 +125,13 @@ const HomeSection: React.FC<Props> = ({
                 key={act.id}
                 onClick={() => onTakeAct(act.id)}
                 className={`p-6 rounded-2xl border cursor-pointer transition
-                  ${taken ? 'ring-2 ring-amber-400 bg-white' : 'bg-white hover:shadow-md'}`}
+                  ${taken ? 'ring-2 bg-white' : 'bg-white hover:shadow-md'}`}
+                style={{
+                  borderColor: taken ? theme.accent : undefined,
+                }}
               >
                 <div className="mb-4">
-                  {taken ? <CheckCircle2 className="text-amber-500" /> : getIcon(act.icon)}
+                  {taken ? <CheckCircle2 style={{ color: theme.accent }} /> : getIcon(act.icon)}
                 </div>
                 <h4 className="font-bold mb-2">{act.title}</h4>
                 <p className="text-sm text-slate-600 mb-4">{act.description}</p>
@@ -137,12 +148,13 @@ const HomeSection: React.FC<Props> = ({
       </section>
 
       {/* CTA */}
-      <section className="bg-slate-900 text-white py-24 text-center">
-        <Book className="mx-auto mb-4 text-amber-400" />
+      <section className="text-white py-24 text-center" style={{ backgroundColor: theme.primary }}>
+        <Book className="mx-auto mb-4" style={{ color: theme.accent }} />
         <h3 className="text-3xl font-bold mb-4">לעילוי נשמתו</h3>
         <button
           onClick={() => onNavigate(SectionType.JUDAISM)}
-          className="bg-amber-500 text-black px-8 py-3 rounded-full font-bold"
+          className="text-black px-8 py-3 rounded-full font-bold"
+          style={{ backgroundColor: theme.accent }}
         >
           מעבר לפרק המלא
         </button>

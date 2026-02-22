@@ -19,6 +19,7 @@ const App: React.FC = () => {
     prototype: PrototypeType.MEMORIAL,
     primaryColor: COLORS[0].value,
     secondaryColor: '#ffffff',
+    accentColor: '#f59e0b',
     description: '',
     features: [],
     contactEmail: '',
@@ -40,7 +41,8 @@ const App: React.FC = () => {
         (async () => {
           try {
             const data = await getPublicWebsite(site);
-            setPublicSiteConfig(data.website || data);
+            const loadedConfig = data?.website?.content || data?.website || data;
+            setPublicSiteConfig(loadedConfig);
           } catch (err) {
             console.error('Failed to load public site:', err);
           }
