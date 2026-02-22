@@ -8,6 +8,7 @@ export interface DeploymentSuccessProps {
   lang: Language;
   onClose?: () => void;
   onViewSite?: () => void;
+  onProceedToPayment?: () => void;
 }
 
 const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
@@ -17,6 +18,7 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
   lang,
   onClose,
   onViewSite,
+  onProceedToPayment,
 }) => {
   const isRtl = lang === 'he';
   const [copied, setCopied] = useState(false);
@@ -148,6 +150,14 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">
+          {onProceedToPayment && (
+            <button
+              onClick={onProceedToPayment}
+              className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              {lang === 'he' ? 'לתשלום וסיום' : 'Proceed to Payment'}
+            </button>
+          )}
           <button
             onClick={handleViewSite}
             className="flex-1 px-4 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors"
@@ -157,9 +167,9 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition-colors"
+              className="px-4 py-3 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition-colors"
             >
-              {lang === 'he' ? 'סגור' : 'Close'}
+              {lang === 'he' ? 'סיום' : 'Finish'}
             </button>
           )}
         </div>

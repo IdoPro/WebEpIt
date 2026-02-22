@@ -16,6 +16,7 @@ export interface MemorialAppProps {
 }
 
 const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
+  const isMemoryRecord = (item: any): item is Memory => Boolean(item && (item.id || item._id));
   const [memories, setMemories] = useState<Memory[]>([]);
   const [isCandleLit, setIsCandleLit] = useState(false);
   const [candleCount, setCandleCount] = useState(0);
@@ -41,7 +42,7 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
           fetch('/api/memories').then(res => res.json()),
           fetch('/api/stats').then(res => res.json())
         ]);
-        if (Array.isArray(memoriesRes)) setMemories(memoriesRes);
+        if (Array.isArray(memoriesRes)) setMemories(memoriesRes.filter(isMemoryRecord));
         if (statsRes) {
           setCandleCount(statsRes.candleCount || 124);
           setActCommitments(statsRes.commitments || actCommitments);
@@ -81,11 +82,14 @@ const Memorial_App: React.FC<MemorialAppProps> = ({ config, lang = 'he' }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(memoryData)
       });
-      const savedMemory = await response.json();
-      setMemories([savedMemory, ...memories]);
+      if (!response.ok) throw new Error(`status ${response.status}`);
+      const payload = await response.json();
+      const savedMemory = payload?.data ?? payload;
+      if (!isMemoryRecord(savedMemory)) throw new Error('Invalid memory payload');
+      setMemories([savedMemory, ...memories].filter(isMemoryRecord));
     } catch (e) {
       // Fallback local update
-      setMemories([{ ...memoryData, id: Date.now().toString() }, ...memories]);
+      setMemories([{ ...memoryData, id: Date.now().toString() }, ...memories].filter(isMemoryRecord));
     }
 
     setNewMemory({ author: '', relation: '', content: '' });

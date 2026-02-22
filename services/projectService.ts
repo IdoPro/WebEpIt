@@ -46,12 +46,13 @@ export const projectService = {
       }
 
       // Map SiteConfig to our server's client creation format
+      // לעכשיו הDefault הוא memorial, אבל אפשר להוסיף לוגיקה שתבחר את סוג האתר לפי config.prototypeType
       const websiteData = {
         clientName: config.projectName || config.deceasedName || 'Unnamed Project',
         email: config.email.trim(),
         websiteType: config.prototypeType?.toLowerCase() === 'memorial' ? 'memorial' : 
                      config.prototypeType?.toLowerCase() === 'portfolio' ? 'portfolio' :
-                     config.prototypeType?.toLowerCase() === 'ecommerce' ? 'business' : 'blog',
+                     config.prototypeType?.toLowerCase() === 'ecommerce' ? 'business' : 'memorial',
         website: {
           title: config.projectName || config.deceasedName || 'My Website',
           description: config.description || 'Created with SiteForg',
@@ -73,10 +74,9 @@ export const projectService = {
       return {
         success: true,
         projectId: clientData.clientId,
-        serialNumber: clientData.serialNumber,
         uniqueKey: clientData.uniqueKey,
-        url: clientData.websiteUrl,
-        customDomain: clientData.serialNumber,
+        url: clientData.url || clientData.websiteUrl,
+        customDomain: clientData.customDomain || clientData.serialNumber,
         message: 'Project deployed successfully',
       };
     } catch (error) {

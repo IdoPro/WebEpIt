@@ -4,6 +4,7 @@ import { UI_STRINGS } from '../../constants';
 import CodeViewer from '../CodeViewer';
 import { CheckCircle2, Zap, Heart, Lock, Copy } from 'lucide-react';
 import { deployProject, DeploymentResponse } from '../../services/deploymentService';
+import { DeploymentResponse as CreatedDeploymentResponse } from '../../services/projectService';
 
 interface Step3Props {
   lang: Language;
@@ -11,9 +12,10 @@ interface Step3Props {
   setResult: (result: GenerationResult | null) => void;
   result?: GenerationResult | null;
   config?: SiteConfig | null;
+  preDeployed?: CreatedDeploymentResponse | null;
 }
 
-const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config }) => {
+const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config, preDeployed }) => {
   const t = UI_STRINGS[lang];
   const isRtl = lang === 'he';
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -37,6 +39,19 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
     try {
       // Process payment (placeholder)
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (preDeployed?.projectId && preDeployed?.url) {
+        setDeployment({
+          success: true,
+          projectId: preDeployed.projectId,
+          url: preDeployed.url,
+          customDomain: preDeployed.customDomain,
+          message: preDeployed.message || 'Payment completed successfully',
+        });
+        setDeploymentDone(true);
+        setProcessing(false);
+        return;
+      }
 
       // Deploy project to server
       if (config && result) {
@@ -67,18 +82,18 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
               <CheckCircle2 className="w-12 h-12 text-green-600" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-4">
-              {lang === 'he' ? '🚀 אתרך פעיל!' : '🚀 Site is Live!'}
+              {lang === 'he' ? '�️ ההנצחה נוצרה!' : '🕯️ Memorial is Live!'}
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
               {lang === 'he' 
-                ? 'התשלום הושלם בהצלחה ואתרך כעת פעיל באינטרנט.' 
-                : 'Payment successful and your site is now live on the internet.'}
+                ? 'ההנצחה שלך נוצרה בהצלחה והיא כעת פעילה באינטרנט לנצח.' 
+                : 'Your memorial has been created and is now live forever online.'}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-2xl p-10 border-2 border-green-200 mb-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-              {lang === 'he' ? 'פרטי האתר שלך' : 'Your Site Details'}
+              {lang === 'he' ? 'פרטי ההנצחה שלך' : 'Your Memorial Details'}
             </h2>
 
             {/* Project ID */}
@@ -106,7 +121,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
             {/* Site URL */}
             <div className="mb-6 p-6 bg-green-50 rounded-xl border-2 border-green-200">
               <label className="block text-sm font-bold text-green-700 mb-2">
-                {lang === 'he' ? 'כתובת האתר שלך' : 'Your Site URL'}
+                {lang === 'he' ? 'כתובת ההנצחה שלך' : 'Your Memorial URL'}
               </label>
               <div className="flex items-center gap-2">
                 <a
@@ -175,9 +190,9 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => { setStep(1); setResult(null); }}
-              className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg"
+              className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg"
             >
-              {lang === 'he' ? '✨ הצור אתר חדש' : '✨ Create Another Site'}
+              {lang === 'he' ? '🕯️ הנצח נוסף' : '🕯️ Create Another Memorial'}
             </button>
             <a
               href={deployment.url}
@@ -185,7 +200,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
               rel="noopener noreferrer"
               className="px-8 py-4 bg-white border-2 border-slate-300 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition-all"
             >
-              {lang === 'he' ? '👁️ צפה בעד עכשיו' : '👁️ View Now'}
+              {lang === 'he' ? '👁️ בקר בהנצחה' : '👁️ Visit Memorial'}
             </a>
           </div>
         </div>
@@ -203,12 +218,12 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-4">
-            {lang === 'he' ? '🎉 אתרך מוכן!' : '🎉 Your Site is Ready!'}
+            {lang === 'he' ? '🕯️ ההנצחה שלך מוכנה!' : '🕯️ Your Memorial is Ready!'}
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
             {lang === 'he' 
-              ? 'האתר שלך נוצר בהצלחה וממתין לפריסה. זה פשוט, יעיל וזה בדיוק מה שאתה צריך.' 
-              : 'Your site has been created and is ready to launch. Simple, effective, and exactly what you need.'}
+              ? 'ההנצחה נוצרה בהצלחה וממתינה להתפרסמות. זה פשוט, יפה וכל מה שאתה צריך כדי להנציח ולשמור על המורשת.' 
+              : 'Your memorial is created and ready to launch. Beautiful, simple, and exactly what you need to honor and preserve their memory.'}
           </p>
         </div>
 
@@ -216,23 +231,23 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
           <div className="bg-blue-50 rounded-2xl p-6 text-center">
             <Zap className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'מיד פעיל' : 'Instant Launch'}</h3>
-            <p className="text-sm text-slate-600">{lang === 'he' ? 'הפעל בדקה אחת' : 'Live in minutes'}</p>
+            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'פעיל כעת' : 'Live Now'}</h3>
+            <p className="text-sm text-slate-600">{lang === 'he' ? 'שתף מיד עם המשפחה' : 'Share with family instantly'}</p>
           </div>
           <div className="bg-amber-50 rounded-2xl p-6 text-center">
             <Heart className="w-10 h-10 text-amber-600 mx-auto mb-3" />
-            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'עיצוב מעודן' : 'Beautiful Design'}</h3>
-            <p className="text-sm text-slate-600">{lang === 'he' ? 'מוכן מיד' : 'Zero design work'}</p>
+            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'מכובד וקר' : 'Dignified & Elegant'}</h3>
+            <p className="text-sm text-slate-600">{lang === 'he' ? 'עיצוב מעודן וקל' : 'Respectful & beautiful'}</p>
           </div>
           <div className="bg-purple-50 rounded-2xl p-6 text-center">
             <Lock className="w-10 h-10 text-purple-600 mx-auto mb-3" />
-            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'בטוח' : 'Secure'}</h3>
-            <p className="text-sm text-slate-600">{lang === 'he' ? 'SSL ו-HTTPS' : 'SSL & HTTPS built-in'}</p>
+            <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'בטוח לתמיד' : 'Forever Secure'}</h3>
+            <p className="text-sm text-slate-600">{lang === 'he' ? 'מוגן ונשמר לנצח' : 'Protected & preserved forever'}</p>
           </div>
           <div className="bg-green-50 rounded-2xl p-6 text-center">
             <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-3" />
             <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'תמיכה' : 'Support'}</h3>
-            <p className="text-sm text-slate-600">{lang === 'he' ? 'פריסה מסייעת' : 'Assisted deployment'}</p>
+            <p className="text-sm text-slate-600">{lang === 'he' ? 'סיוע בפריסה מלא' : '24/7 dedicated support'}</p>
           </div>
         </div>
       </div>
@@ -276,9 +291,9 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config 
           {/* Payment Panel */}
           <aside className="lg:col-span-1">
             <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-8 border-2 border-indigo-200 sticky top-8">
-              <h2 className="text-2xl font-black text-slate-900 mb-1">{lang === 'he' ? 'השלם את הפריסה' : 'Complete Launch'}</h2>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">{lang === 'he' ? 'השלם את ההנצחה' : 'Complete Your Memorial'}</h2>
               <p className="text-sm text-slate-600 mb-6">
-                {lang === 'he' ? 'תשלום חד-פעמי, וזה שלך לנצח.' : 'One-time payment, and it\'s yours forever.'}
+                {lang === 'he' ? 'תשלום חד-פעמי, ההנצחה שלך לנצח.' : 'One-time payment, your memorial forever.'}
               </p>
 
               {/* Pricing Box */}

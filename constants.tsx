@@ -62,43 +62,66 @@ export const PROTOTYPES: Prototype[] = [
   }
 ];
 
+// Premium, dignified color palette for memorial websites
 export const COLORS = [
-  { name: 'Slate', value: '#334155' },
-  { name: 'Indigo', value: '#4f46e5' },
+  { name: 'Charcoal', value: '#2c3e50' },
+  { name: 'Slate Blue', value: '#475569' },
   { name: 'Stone', value: '#78716c' },
-  { name: 'Emerald', value: '#10b981' },
-  { name: 'Rose', value: '#e11d48' },
-  { name: 'Amber', value: '#f59e0b' },
+  { name: 'Sage', value: '#6b7280' },
+  { name: 'Rose Gold', value: '#8b6f47' },
+  { name: 'Violet', value: '#6b5b95' },
 ];
 
 export const UI_STRINGS = {
   en: {
-    heroTitle: 'Build Your Site in Seconds',
-    heroSub: 'Choose a prototype, configure your brand, and get a production-ready React site.',
-    configureBtn: 'Continue to Config',
-    customizeTitle: 'Site Configuration',
-    customizeSub: 'Define your content schema and backend integrations.',
+    // Landing Page (Step 1)
+    heroTitle: 'A Living Memorial for Those We Cherish',
+    heroSub: 'Create a beautiful, meaningful space to honor your loved one, preserve their legacy, and unite your family in remembrance.',
+    heroCtaPrimary: 'Begin Memorial',
+    heroCtaSecondary: 'View Example',
+    
+    // Value Propositions
+    valueSimple: 'Remarkably Simple',
+    valueSimpleDesc: 'No technical skills needed. Build a complete memorial website in under an hour with our intuitive interface.',
+    valuePowerful: 'Profoundly Meaningful',
+    valuePowerfulDesc: 'Share life stories, memories, spiritual texts, and create a sacred space for your family to gather and remember.',
+    valueLasting: 'Permanent Legacy',
+    valueLastingDesc: 'Your memorial lives forever. A lasting digital tribute that future generations can discover and cherish.',
+    
+    // Testimonials
+    testimonialTitle: 'Families have created beautiful legacies',
+    testimonialSubtitle: "Hear from families who've honored their loved ones",
+    
+    // Step 2
+    configureBtn: 'Create My Memorial',
+    customizeTitle: 'Design Your Memorial',
+    customizeSub: 'Personalize every detail to reflect the life and legacy of your loved one.',
     back: 'Back',
-    projectName: 'Site Internal Name',
-    projectNamePlaceholder: 'My Awesome Project',
-    brandColors: 'Primary Brand Color',
-    description: 'Site Description & Goals',
-    descriptionPlaceholder: 'Describe your site purpose...',
-    features: 'Select Features',
+    projectName: 'Deceased\'s Full Name',
+    projectNamePlaceholder: 'e.g., Sarah Cohen',
+    brandColors: 'Primary Color Theme',
+    description: 'Life Summary & Legacy',
+    descriptionPlaceholder: 'Share the essence of their life, their values, and what made them special...',
+    features: 'Memorial Features',
     integrations: 'Backend & Storage',
-    buildBtn: 'Start Deployment',
-    generating: 'Building & Deploying...',
-    success: 'Site Live! 🚀',
-    successSub: 'Your code is compiled and ready for deployment.',
-    another: 'New Project',
-    step: 'Stage',
+    buildBtn: 'Create & Deploy Memorial',
+    generating: 'Creating your memorial...',
+    success: 'Memorial Created! 🕯️',
+    successSub: 'Your memorial is now live and ready to share with family and loved ones.',
+    another: 'Create Another Memorial',
+    step: 'Step',
     of: 'of',
     projectFiles: 'Source Code',
-    deployGuide: 'Deployment Guide',
+    deployGuide: 'Setup Guide',
     copy: 'Copy',
     copied: 'Copied!',
-    nextSteps: 'Production Roadmap',
-    nextStepsList: ['1. Clone Generated Repository', '2. Connect Vercel Account', '3. Setup Render Web Service', '4. Map Custom Domain'],
+    nextSteps: 'Next Steps',
+    nextStepsList: [
+      '1. Share the memorial link with family and friends',
+      '2. Customize with photos and memories',
+      '3. Enable guest contributions in settings',
+      '4. Set up Yahrzeit reminders'
+    ],
     // Memorial Specific
     deceasedName: 'Full Name of the Deceased',
     dateOfPassing: 'Date of Passing',
@@ -107,37 +130,87 @@ export const UI_STRINGS = {
     spiritualText: 'Spiritual Text / Prayer'
   },
   he: {
-    heroTitle: 'בנה את האתר שלך בשניות',
-    heroSub: 'בחר אב טיפוס, הגדר את המותג שלך, וקבל אתר React מוכן לייצור.',
-    configureBtn: 'המשך להגדרות',
-    customizeTitle: 'הגדרות אתר',
-    customizeSub: 'הגדר את סכימת התוכן וחיבורי ה-Backend.',
+    // דף הנחיתה (שלב 1)
+    heroTitle: 'מרחב חי להנצחת אהוביינו',
+    heroSub: 'בנו מרחב יפה ומשמעותי לכבוד אדם יקר, שימור מורשת המשפחה, ושיתוף טלטל הזיכרונות.',
+    heroCtaPrimary: 'התחל אתר הנצחה',
+    heroCtaSecondary: 'צפה בדוגמה',
+    
+    // הצעות ערך
+    valueSimple: 'פשוט להפליא',
+    valueSimpleDesc: 'לא צריך ידע טכני. בנו אתר הנצחה מלא תוך שעה באמצעות הממשק האינטואיטיבי שלנו.',
+    valuePowerful: 'משמעותי עמוקות',
+    valuePowerfulDesc: 'שתפו סיפורי חיים, זיכרונות, טקסטים רוחניים, ובנו מרחב קדוש למשפחה להתכנס וללזכור.',
+    valueLasting: 'מורשת נצחית',
+    valueLastingDesc: 'ההנצחה שלכם חיה לעד. זיכרון דיגיטלי קבוע שדורות עתידיים יוכלו לגלות ולהעריך.',
+    
+    // ממליצים
+    testimonialTitle: 'משפחות יצרו מורשות יפות',
+    testimonialSubtitle: "שמעו ממשפחות שהנציחו את אהוביהן",
+    
+    // שלב 2
+    configureBtn: 'בנו את ההנצחה שלי',
+    customizeTitle: 'עיצוב ההנצחה שלך',
+    customizeSub: 'התאם כל פרט כדי לשקף את חיי המנוח/ה והמורשת שלהם.',
     back: 'חזור',
-    projectName: 'שם הפרויקט (פנימי)',
-    projectNamePlaceholder: 'הפרויקט המדהים שלי',
-    brandColors: 'צבע מותג ראשי',
-    description: 'תיאור האתר ומטרות',
-    descriptionPlaceholder: 'תאר את מטרת האתר...',
-    features: 'בחר פיצ׳רים',
+    projectName: 'שם מלא של המנוח/ה',
+    projectNamePlaceholder: 'לדוגמה, שרה כהן',
+    brandColors: 'צבע נושא',
+    description: 'סיכום חיים ומורשה',
+    descriptionPlaceholder: 'שתפו את מהות חייהם, הערכים שלהם, ומה שהופך אותם למיוחדים...',
+    features: 'פיצ׳רים בהנצחה',
     integrations: 'שרת ואחסון',
-    buildBtn: 'התחל פריסה (Deploy)',
-    generating: 'בונה ומפיץ אתר...',
-    success: 'האתר באוויר! 🚀',
-    successSub: 'הקוד שלך עבר קומפילציה ומוכן לשימוש.',
-    another: 'פרויקט חדש',
+    buildBtn: 'בנו ופרסמו את ההנצחה',
+    generating: 'בונה את ההנצחה שלך...',
+    success: 'ההנצחה נוצרה! 🕯️',
+    successSub: 'ההנצחה שלך עכשיו חיה והיא מוכנה להשתתפות עם משפחה ויקיריםם.',
+    another: 'בנו הנצחה נוספת',
     step: 'שלב',
     of: 'מתוך',
     projectFiles: 'קוד מקור',
-    deployGuide: 'מדריך פריסה',
+    deployGuide: 'מדריך הגדרה',
     copy: 'העתק',
     copied: 'הועתק!',
-    nextSteps: 'מפת דרכים לייצור',
-    nextStepsList: ['1. שכפל את המאגר שנוצר', '2. חבר חשבון Vercel', '3. הגדר שירות ב-Render', '4. חבר דומיין מותאם אישית'],
+    nextSteps: 'שלבים הבאים',
+    nextStepsList: [
+      '1. שתפו את קישור ההנצחה עם משפחה וחברים',
+      '2. התאימו עם תמונות וזיכרונות',
+      '3. אפשרו תרומות של אורחים בהגדרות',
+      '4. הגדרו תזכורות לימי יארצייט'
+    ],
     // Memorial Specific
-    deceasedName: 'שם המנוח/ה',
+    deceasedName: 'שם מלא של המנוח/ה',
     dateOfPassing: 'תאריך פטירה (לועזי)',
     hebrewDate: 'תאריך עברי (לדוגמה: כ"א בתשרי)',
     relationship: 'קרבה משפחתית',
     spiritualText: 'טקסט רוחני / תפילה'
   }
 };
+
+// Testimonials for the landing page
+export const TESTIMONIALS = [
+  {
+    name: { en: 'Rachel M.', he: 'רחל מ.' },
+    relationship: { en: 'Daughter', he: 'בת' },
+    quote: { 
+      en: "Creating this memorial for my mother brought our whole family together. It's been almost a year, and people still visit to share memories and light a candle.", 
+      he: "יצירת ההנצחה עבור אמא שלי איחדה את כל המשפחה. כמעט שנה עברה, ועדיין אנשים מבקרים כדי לשתף זיכרונות ולהדליק נר."
+    }
+  },
+  {
+    name: { en: 'David & Miriam K.', he: 'דוד ומרים כ.' },
+    relationship: { en: 'Daughter & Son-in-law', he: 'בת וחתן' },
+    quote: { 
+      en: "The process was so simple. Within an hour, we had a beautiful, permanent home for dad's stories and legacy. It feels like a spiritual act.", 
+      he: "התהליך היה כל כך פשוט. תוך שעה, היה לנו בית יפה וקבוע לסיפורי אבא והמורשת שלו. זה מרגיש כמו מעשה רוחני."
+    }
+  },
+  {
+    name: { en: 'Yeshua F.', he: 'ישועה ף.' },
+    relationship: { en: 'Sons', he: 'בנים' },
+    quote: { 
+      en: "Every family member, even those overseas, can gather here and feel connected. It's a blessing that will be passed down to our children.", 
+      he: "כל חברי משפחה, אפילו אלה בחו״ל, יכולים להתכנס כאן ולהרגיש קשורים. זה ברכה שתיעבור לילדינו."
+    }
+  }
+];
