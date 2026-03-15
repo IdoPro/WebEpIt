@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GenerationResult, Language, SiteConfig } from '../../types';
 import { UI_STRINGS } from '../../constants';
 import CodeViewer from '../CodeViewer';
 import { CheckCircle2, Zap, Heart, Lock, Copy } from 'lucide-react';
 import { deployProject, DeploymentResponse } from '../../services/deploymentService';
 import { DeploymentResponse as CreatedDeploymentResponse } from '../../services/projectService';
+import {
+  capturePayPalOrder,
+  createPayPalOrder,
+  getPayPalClientConfig,
+  PayPalClientConfig,
+  PayPalRequestError,
+} from '../../services/paypalService';
+
+declare global {
+  interface Window {
+    paypal?: {
+      Buttons: (options: any) => {
+        isEligible?: () => boolean;
+        render: (selector: string | HTMLElement) => Promise<void>;
+        close?: () => Promise<void> | void;
+      };
+    };
+  }
+}
 
 interface Step3Props {
   lang: Language;
@@ -24,22 +43,34 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
   const [deploymentDone, setDeploymentDone] = useState(false);
   const [deployment, setDeployment] = useState<DeploymentResponse | null>(null);
   const [deploymentError, setDeploymentError] = useState<string | null>(null);
+  const [paypalConfig, setPayPalConfig] = useState<PayPalClientConfig | null>(null);
+  const [paypalLoading, setPayPalLoading] = useState(true);
+  const [paypalError, setPayPalError] = useState<string | null>(null);
+  const [paymentApproved, setPaymentApproved] = useState(false);
 
-  const price = 49; // default price in USD
+  const paypalContainerRef = useRef<HTMLDivElement | null>(null);
+  const paypalButtonsRef = useRef<{ close?: () => Promise<void> | void } | null>(null);
 
-  const handlePayment = async () => {
-    if (!acceptedTerms) {
-      alert(lang === 'he' ? 'אנא אשרו את התנאים לפני התשלום.' : 'Please accept the terms before payment.');
-      return;
+  const formattedPrice = useMemo(() => {
+    const currency = paypalConfig?.currency || 'USD';
+    const price = paypalConfig?.price || 49;
+
+    try {
+      return new Intl.NumberFormat(lang === 'he' ? 'he-IL' : 'en-US', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+      }).format(price);
+    } catch {
+      return `${currency} ${price}`;
     }
-    
+  }, [lang, paypalConfig]);
+
+  const finalizeDeployment = useCallback(async () => {
     setProcessing(true);
     setDeploymentError(null);
 
     try {
-      // Process payment (placeholder)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       if (preDeployed?.projectId && preDeployed?.url) {
         setDeployment({
           success: true,
@@ -49,40 +80,193 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
           message: preDeployed.message || 'Payment completed successfully',
         });
         setDeploymentDone(true);
-        setProcessing(false);
         return;
       }
 
-      // Deploy project to server
-      if (config && result) {
-        const deploymentResponse = await deployProject(config, result);
-        setDeployment(deploymentResponse);
-        setDeploymentDone(true);
-      } else {
+      if (!config || !result) {
         throw new Error('Missing configuration or result');
       }
 
-      setProcessing(false);
+      const deploymentResponse = await deployProject(config, result);
+      setDeployment(deploymentResponse);
+      setDeploymentDone(true);
     } catch (error) {
-      console.error('Payment/Deployment error:', error);
+      console.error('Deployment error:', error);
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       setDeploymentError(errorMsg);
+    } finally {
       setProcessing(false);
-      alert(lang === 'he' ? `שגיאה: ${errorMsg}` : `Error: ${errorMsg}`);
     }
-  };
+  }, [config, preDeployed, result]);
 
-  // Deployment success screen
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPayPalConfig = async () => {
+      try {
+        setPayPalLoading(true);
+        setPayPalError(null);
+        const config = await getPayPalClientConfig();
+        if (isMounted) {
+          setPayPalConfig(config);
+        }
+      } catch (error) {
+        if (isMounted) {
+          const errorMsg = error instanceof Error ? error.message : 'Failed to load PayPal configuration';
+          setPayPalError(errorMsg);
+        }
+      } finally {
+        if (isMounted) {
+          setPayPalLoading(false);
+        }
+      }
+    };
+
+    loadPayPalConfig();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!paypalConfig) {
+      return;
+    }
+
+    const existingScript = document.querySelector('script[data-paypal-sdk="true"]') as HTMLScriptElement | null;
+    if (window.paypal) {
+      setPayPalLoading(false);
+      return;
+    }
+
+    if (existingScript) {
+      setPayPalLoading(true);
+      existingScript.addEventListener('load', () => setPayPalLoading(false));
+      existingScript.addEventListener('error', () => {
+        setPayPalError(lang === 'he' ? 'טעינת PayPal נכשלה' : 'Failed to load PayPal SDK');
+        setPayPalLoading(false);
+      });
+      return;
+    }
+
+    setPayPalLoading(true);
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalConfig.clientId)}&currency=${encodeURIComponent(paypalConfig.currency)}&intent=${encodeURIComponent(paypalConfig.intent)}`;
+    script.async = true;
+    script.dataset.paypalSdk = 'true';
+    script.onload = () => setPayPalLoading(false);
+    script.onerror = () => {
+      setPayPalError(lang === 'he' ? 'טעינת PayPal נכשלה' : 'Failed to load PayPal SDK');
+      setPayPalLoading(false);
+    };
+
+    document.body.appendChild(script);
+  }, [lang, paypalConfig]);
+
+  useEffect(() => {
+    if (!paypalConfig || !acceptedTerms || paypalLoading || !window.paypal || deploymentDone || paymentApproved) {
+      if (paypalContainerRef.current && !acceptedTerms) {
+        paypalContainerRef.current.innerHTML = '';
+      }
+      return;
+    }
+
+    const container = paypalContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML = '';
+
+    const buttons = window.paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        shape: 'pill',
+        label: 'paypal',
+        height: 46,
+      },
+      createOrder: async () => {
+        const description =
+          lang === 'he'
+            ? `תשלום עבור אתר הנצחה: ${config?.name || 'Memorial Project'}`
+            : `Payment for memorial website: ${config?.name || 'Memorial Project'}`;
+        return createPayPalOrder(description);
+      },
+      onApprove: async (
+        data: { orderID?: string },
+        actions: { restart?: () => Promise<void> | void }
+      ) => {
+        try {
+          if (!data.orderID) {
+            throw new Error('Missing PayPal order ID');
+          }
+
+          setProcessing(true);
+          setPayPalError(null);
+          const captureResult = await capturePayPalOrder(data.orderID);
+          if (captureResult?.status !== 'COMPLETED') {
+            throw new Error(lang === 'he' ? 'התשלום לא הושלם' : 'Payment was not completed');
+          }
+
+          setPaymentApproved(true);
+          await finalizeDeployment();
+        } catch (error) {
+          if (
+            error instanceof PayPalRequestError
+            && (error.recoverable || error.code === 'INSTRUMENT_DECLINED')
+            && actions?.restart
+          ) {
+            setPayPalError(
+              lang === 'he'
+                ? 'אמצעי התשלום נדחה. נסה/י אמצעי אחר בחלון PayPal.'
+                : 'Payment method was declined. Please try another method in PayPal.'
+            );
+            setProcessing(false);
+            await actions.restart();
+            return;
+          }
+
+          const errorMsg = error instanceof Error ? error.message : 'PayPal approval failed';
+          setPayPalError(errorMsg);
+          setProcessing(false);
+        }
+      },
+      onCancel: () => {
+        setPayPalError(lang === 'he' ? 'התשלום בוטל. אפשר לנסות שוב.' : 'Payment was canceled. You can try again.');
+      },
+      onError: (error: unknown) => {
+        const errorMsg = error instanceof Error ? error.message : 'PayPal error';
+        setPayPalError(errorMsg);
+      },
+    });
+
+    if (buttons.isEligible && !buttons.isEligible()) {
+      setPayPalError(lang === 'he' ? 'PayPal לא זמין במכשיר/דפדפן זה' : 'PayPal is not available in this browser');
+      return;
+    }
+
+    buttons.render(container);
+    paypalButtonsRef.current = buttons;
+
+    return () => {
+      if (paypalButtonsRef.current?.close) {
+        paypalButtonsRef.current.close();
+      }
+      paypalButtonsRef.current = null;
+    };
+  }, [acceptedTerms, config?.name, deploymentDone, finalizeDeployment, lang, paymentApproved, paypalConfig, paypalLoading]);
+
   if (deploymentDone && deployment) {
     return (
       <div className="animate-in fade-in duration-500 pb-20" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="max-w-3xl mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="inline-block p-4 bg-green-100 rounded-full mb-6 animate-bounce">
+            <div className="inline-block p-4 bg-gradient-to-br from-emerald-100 to-green-50 rounded-full mb-6 animate-bounce shadow-lg">
               <CheckCircle2 className="w-12 h-12 text-green-600" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-4">
-              {lang === 'he' ? '�️ ההנצחה נוצרה!' : '🕯️ Memorial is Live!'}
+              {lang === 'he' ? 'ההנצחה נוצרה!' : 'Memorial is Live!'}
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
               {lang === 'he' 
@@ -91,13 +275,13 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-2xl p-10 border-2 border-green-200 mb-8">
+          <div className="bg-white/90 backdrop-blur rounded-3xl shadow-[0_24px_60px_rgba(15,23,42,0.14)] p-10 border border-green-200/60 mb-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
               {lang === 'he' ? 'פרטי ההנצחה שלך' : 'Your Memorial Details'}
             </h2>
 
             {/* Project ID */}
-            <div className="mb-6 p-6 bg-slate-50 rounded-xl">
+            <div className="mb-6 p-6 bg-slate-50/80 rounded-2xl border border-slate-100">
               <label className="block text-sm font-bold text-slate-600 mb-2">
                 {lang === 'he' ? 'ID הפרויקט' : 'Project ID'}
               </label>
@@ -110,7 +294,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                     navigator.clipboard.writeText(deployment.projectId);
                     alert(lang === 'he' ? 'הועתק!' : 'Copied!');
                   }}
-                  className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="p-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg hover:from-indigo-700 hover:to-violet-700 transition-colors"
                   title="Copy to clipboard"
                 >
                   <Copy className="w-5 h-5" />
@@ -119,7 +303,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
             </div>
 
             {/* Site URL */}
-            <div className="mb-6 p-6 bg-green-50 rounded-xl border-2 border-green-200">
+            <div className="mb-6 p-6 bg-green-50/80 rounded-2xl border border-green-200">
               <label className="block text-sm font-bold text-green-700 mb-2">
                 {lang === 'he' ? 'כתובת ההנצחה שלך' : 'Your Memorial URL'}
               </label>
@@ -137,7 +321,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                     navigator.clipboard.writeText(deployment.url);
                     alert(lang === 'he' ? 'הועתק!' : 'Copied!');
                   }}
-                  className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="p-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors"
                   title="Copy URL"
                 >
                   <Copy className="w-5 h-5" />
@@ -146,7 +330,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                   href={deployment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-bold"
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors text-sm font-bold"
                 >
                   {lang === 'he' ? 'ביקור' : 'Visit'}
                 </a>
@@ -154,7 +338,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
             </div>
 
             {/* Custom Domain */}
-            <div className="mb-6 p-6 bg-blue-50 rounded-xl">
+            <div className="mb-6 p-6 bg-blue-50/80 rounded-2xl border border-blue-100">
               <label className="block text-sm font-bold text-slate-600 mb-2">
                 {lang === 'he' ? 'דומיין מותאם אישית' : 'Custom Domain'}
               </label>
@@ -169,7 +353,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
             </div>
 
             {/* Next Steps */}
-            <div className="bg-amber-50 rounded-xl p-6 border-l-4 border-amber-500">
+            <div className="bg-amber-50/80 rounded-2xl p-6 border-l-4 border-amber-500 shadow-sm">
               <h3 className="font-bold text-slate-900 mb-3">
                 {lang === 'he' ? 'השלבים הבאים' : 'Next Steps'}
               </h3>
@@ -190,9 +374,9 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => { setStep(1); setResult(null); }}
-              className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg"
+              className="px-8 py-4 bg-gradient-to-r from-slate-900 to-indigo-700 text-white font-bold rounded-xl hover:from-slate-800 hover:to-indigo-600 transition-all shadow-lg"
             >
-              {lang === 'he' ? '🕯️ הנצח נוסף' : '🕯️ Create Another Memorial'}
+              {lang === 'he' ? 'הנצח נוסף' : 'Create Another Memorial'}
             </button>
             <a
               href={deployment.url}
@@ -200,7 +384,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
               rel="noopener noreferrer"
               className="px-8 py-4 bg-white border-2 border-slate-300 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition-all"
             >
-              {lang === 'he' ? '👁️ בקר בהנצחה' : '👁️ Visit Memorial'}
+              {lang === 'he' ? 'בקר בהנצחה' : 'Visit Memorial'}
             </a>
           </div>
         </div>
@@ -208,17 +392,16 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
     );
   }
 
-  // Regular pre-payment screen
   return (
     <div className="animate-in fade-in duration-500 pb-20" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Hero Section with Success Message */}
       <div className="max-w-7xl mx-auto px-4 mb-16">
         <div className="text-center mb-12">
-          <div className="inline-block p-3 bg-green-100 rounded-full mb-6">
+          <div className="inline-block p-3 bg-gradient-to-br from-emerald-100 to-green-50 rounded-full mb-6 shadow">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-4">
-            {lang === 'he' ? '🕯️ ההנצחה שלך מוכנה!' : '🕯️ Your Memorial is Ready!'}
+            {lang === 'he' ? 'ההנצחה שלך מוכנה!' : 'Your Memorial is Ready!'}
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
             {lang === 'he' 
@@ -229,22 +412,22 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
 
         {/* Simplicity Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-          <div className="bg-blue-50 rounded-2xl p-6 text-center">
+          <div className="bg-white/90 rounded-2xl p-6 text-center border border-blue-100 shadow-sm hover:shadow-md transition-all">
             <Zap className="w-10 h-10 text-blue-600 mx-auto mb-3" />
             <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'פעיל כעת' : 'Live Now'}</h3>
             <p className="text-sm text-slate-600">{lang === 'he' ? 'שתף מיד עם המשפחה' : 'Share with family instantly'}</p>
           </div>
-          <div className="bg-amber-50 rounded-2xl p-6 text-center">
+          <div className="bg-white/90 rounded-2xl p-6 text-center border border-amber-100 shadow-sm hover:shadow-md transition-all">
             <Heart className="w-10 h-10 text-amber-600 mx-auto mb-3" />
             <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'מכובד וקר' : 'Dignified & Elegant'}</h3>
             <p className="text-sm text-slate-600">{lang === 'he' ? 'עיצוב מעודן וקל' : 'Respectful & beautiful'}</p>
           </div>
-          <div className="bg-purple-50 rounded-2xl p-6 text-center">
+          <div className="bg-white/90 rounded-2xl p-6 text-center border border-purple-100 shadow-sm hover:shadow-md transition-all">
             <Lock className="w-10 h-10 text-purple-600 mx-auto mb-3" />
             <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'בטוח לתמיד' : 'Forever Secure'}</h3>
             <p className="text-sm text-slate-600">{lang === 'he' ? 'מוגן ונשמר לנצח' : 'Protected & preserved forever'}</p>
           </div>
-          <div className="bg-green-50 rounded-2xl p-6 text-center">
+          <div className="bg-white/90 rounded-2xl p-6 text-center border border-green-100 shadow-sm hover:shadow-md transition-all">
             <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-3" />
             <h3 className="font-bold text-slate-900 mb-2">{lang === 'he' ? 'תמיכה' : 'Support'}</h3>
             <p className="text-sm text-slate-600">{lang === 'he' ? 'סיוע בפריסה מלא' : '24/7 dedicated support'}</p>
@@ -257,9 +440,9 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Site Preview / Code Viewer Toggle */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+            <div className="bg-white/90 rounded-3xl shadow-[0_20px_50px_rgba(15,23,42,0.12)] border border-white/90 overflow-hidden backdrop-blur">
               {!showCodeViewer ? (
-                <div className="bg-slate-50 p-8 min-h-[600px] flex items-center justify-center">
+                <div className="bg-gradient-to-br from-slate-50 to-indigo-50/40 p-8 min-h-[600px] flex items-center justify-center">
                   <div className="text-center max-w-md">
                     <h3 className="text-lg font-bold mb-3 text-slate-900">
                       {lang === 'he' ? 'תצוגה מקדימה' : 'Live Preview'}
@@ -269,7 +452,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                         ? 'האתר שלך יוצג כאן. בעת הפריסה תוכל לצפות בו ישירות מה-URL המקצועי שלך.'
                         : 'Your site preview will appear here. After launch, view it from your custom URL.'}
                     </p>
-                    <div className="inline-block px-6 py-3 bg-indigo-100 text-indigo-700 rounded-lg font-mono text-sm">
+                    <div className="inline-block px-6 py-3 bg-white border border-indigo-200 text-indigo-700 rounded-lg font-mono text-sm shadow-sm">
                       yoursite-memorial.cloud
                     </div>
                   </div>
@@ -281,7 +464,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
               )}
               <button
                 onClick={() => setShowCodeViewer(!showCodeViewer)}
-                className="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm transition-colors"
+                className="w-full px-4 py-3 bg-slate-100/80 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors"
               >
                 {showCodeViewer ? (lang === 'he' ? 'חזרה לתצוגה מקדימה' : 'Back to Preview') : (lang === 'he' ? 'הצג קוד (עבור מפתחים)' : 'Show Code (Developers)')}
               </button>
@@ -290,11 +473,23 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
 
           {/* Payment Panel */}
           <aside className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-8 border-2 border-indigo-200 sticky top-8">
+            <div className="bg-white/90 rounded-3xl p-8 border border-indigo-100 shadow-[0_20px_50px_rgba(15,23,42,0.12)] sticky top-8 backdrop-blur">
               <h2 className="text-2xl font-black text-slate-900 mb-1">{lang === 'he' ? 'השלם את ההנצחה' : 'Complete Your Memorial'}</h2>
               <p className="text-sm text-slate-600 mb-6">
                 {lang === 'he' ? 'תשלום חד-פעמי, ההנצחה שלך לנצח.' : 'One-time payment, your memorial forever.'}
               </p>
+
+              {deploymentError && (
+                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {lang === 'he' ? 'שגיאת פריסה:' : 'Deployment error:'} {deploymentError}
+                </div>
+              )}
+
+              {paypalError && (
+                <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  {paypalError}
+                </div>
+              )}
 
               {/* Pricing Box */}
               <div className="bg-white rounded-xl p-6 mb-6 border border-indigo-100">
@@ -302,8 +497,8 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                   <span className="text-slate-600 font-medium text-sm">{lang === 'he' ? 'מחיר סופי' : 'Final Price'}</span>
                   <span className="text-xs text-slate-400">{lang === 'he' ? 'יותר מערך' : 'Great value'}</span>
                 </div>
-                <div className="text-4xl font-black text-indigo-600 mb-2">
-                  ${price}
+                <div className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent mb-2">
+                  {formattedPrice}
                 </div>
                 <p className="text-xs text-slate-500">
                   {lang === 'he' ? 'כולל פריסה, SSL, ותמיכה' : 'Includes deployment, SSL, support'}
@@ -326,7 +521,7 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
               </div>
 
               {/* Terms Checkbox */}
-              <label className="flex items-start gap-3 mb-6 p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all">
+              <label className="flex items-start gap-3 mb-6 p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all shadow-sm">
                 <input 
                   type="checkbox" 
                   checked={acceptedTerms} 
@@ -343,25 +538,32 @@ const Step3: React.FC<Step3Props> = ({ lang, setStep, setResult, result, config,
                 </div>
               </label>
 
-              {/* Payment Button */}
-              <button
-                onClick={handlePayment}
-                disabled={!acceptedTerms || processing}
-                className={`w-full py-4 rounded-xl font-bold text-lg mb-3 transition-all ${
-                  acceptedTerms && !processing
-                    ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-200'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                {processing ? (
-                  <span className="inline-flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    {lang === 'he' ? 'מעבד...' : 'Processing...'}
-                  </span>
-                ) : (
-                  lang === 'he' ? '💳 לשלם עכשיו' : '💳 Pay Now'
+              <div className="rounded-2xl border border-indigo-100 bg-white p-4 mb-3">
+                <div className="mb-3 flex items-center justify-between text-xs text-slate-500">
+                  <span>{lang === 'he' ? 'תשלום מאובטח על ידי' : 'Secure checkout powered by'}</span>
+                  <span className="font-bold text-[#003087]">PayPal</span>
+                </div>
+
+                {!acceptedTerms && (
+                  <p className="text-xs text-slate-500 mb-3">
+                    {lang === 'he' ? 'כדי להמשיך לתשלום, אשר/י את התנאים.' : 'Accept the terms to continue to payment.'}
+                  </p>
                 )}
-              </button>
+
+                {paypalLoading && (
+                  <div className="w-full rounded-xl bg-slate-100 py-3 text-center text-sm text-slate-500">
+                    {lang === 'he' ? 'טוען את PayPal...' : 'Loading PayPal...'}
+                  </div>
+                )}
+
+                <div ref={paypalContainerRef} className={!acceptedTerms || paypalLoading ? 'pointer-events-none opacity-50' : ''} />
+
+                {processing && (
+                  <div className="mt-3 w-full rounded-xl bg-emerald-50 py-3 text-center text-sm font-semibold text-emerald-700">
+                    {lang === 'he' ? 'מעבד תשלום ופורס את האתר...' : 'Processing payment and deploying your site...'}
+                  </div>
+                )}
+              </div>
 
               <button 
                 onClick={() => window.open('/terms', '_blank')} 

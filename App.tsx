@@ -104,36 +104,41 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="relative min-h-screen overflow-hidden bg-slate-50" dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 -left-16 h-96 w-96 rounded-full bg-indigo-200/35 blur-3xl" />
+        <div className="absolute top-24 -right-24 h-[28rem] w-[28rem] rounded-full bg-cyan-200/25 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-amber-200/20 blur-3xl" />
+      </div>
       {/* Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+      <nav className="sticky top-0 z-50 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(15,23,42,0.06)] motion-fade-in">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg text-xl">
-              🕯️
+            <div className="w-11 h-11 bg-gradient-to-br from-slate-900 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="block w-2.5 h-2.5 rounded-full bg-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-none">Digital Memorial <span className="text-slate-600">Builder</span></h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Create a Lasting Legacy</p>
+              <h1 className="text-xl font-extrabold text-slate-900 leading-none">Digital Memorial <span className="text-indigo-700">Builder</span></h1>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Create a Lasting Legacy</p>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="flex bg-slate-100 p-1 rounded-lg">
-              <button onClick={() => setLang('en')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${lang === 'en' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>EN</button>
-              <button onClick={() => setLang('he')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${lang === 'he' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>עב</button>
+            <div className="flex bg-white/70 p-1 rounded-xl border border-slate-200/70 shadow-sm">
+              <button onClick={() => setLang('en')} className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${lang === 'en' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>EN</button>
+              <button onClick={() => setLang('he')} className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${lang === 'he' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>עב</button>
             </div>
-            <div className={`hidden sm:flex items-center gap-2 text-sm text-slate-400 font-medium ${isRtl ? 'border-r pr-6' : 'border-l pl-6'}`}>
+            <div className={`hidden sm:flex items-center gap-2 text-sm text-slate-500 font-semibold ${isRtl ? 'border-r pr-6 border-slate-200' : 'border-l pl-6 border-slate-200'}`}>
               <span>{t.step} {step}/3</span>
-              <div className="flex gap-1">
-                {[1, 2, 3].map(s => <div key={s} className={`h-1.5 w-6 rounded-full transition-all duration-300 ${step >= s ? 'bg-slate-900' : 'bg-slate-200'}`} />)}
+              <div className="flex gap-1.5">
+                {[1, 2, 3].map(s => <div key={s} className={`h-1.5 w-7 rounded-full transition-all duration-300 ${step >= s ? 'bg-gradient-to-r from-indigo-600 to-slate-900' : 'bg-slate-200'}`} />)}
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 mt-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 mt-10">
         {step === 1 && (
           <Step1 lang={lang} setLang={setLang} config={config} setConfig={setConfig} setStep={setStep} />
         )}
@@ -146,13 +151,13 @@ const App: React.FC = () => {
 
       </main>
 
-      <footer className="mt-auto py-12 border-t border-slate-200 text-center bg-white">
+      <footer className="relative z-10 mt-16 py-12 border-t border-white/70 text-center bg-white/70 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 text-sm font-medium">© 2026 Digital Memorial. Honor. Remember. Preserve.</p>
+          <p className="text-slate-500 text-sm font-semibold">© 2026 Digital Memorial. Honor. Remember. Preserve.</p>
           <div className="flex gap-8">
-            <a href="#" className="text-slate-400 hover:text-slate-900 text-xs font-bold uppercase tracking-widest">Support</a>
-            <a href="#" className="text-slate-400 hover:text-slate-900 text-xs font-bold uppercase tracking-widest">Privacy</a>
-            <a href="#" className="text-slate-400 hover:text-slate-900 text-xs font-bold uppercase tracking-widest">Terms</a>
+            <a href="#" className="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors">Support</a>
+            <a href="#" className="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors">Privacy</a>
+            <a href="#" className="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors">Terms</a>
           </div>
         </div>
       </footer>

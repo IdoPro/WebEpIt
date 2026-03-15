@@ -44,13 +44,13 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
   return (
     <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 ${isRtl ? 'rtl' : 'ltr'}`}>
       <div
-        className={`bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 space-y-6 ${
+        className={`bg-white/95 backdrop-blur rounded-3xl shadow-[0_24px_60px_rgba(15,23,42,0.2)] max-w-md w-full p-8 space-y-6 border border-white/80 ${
           isRtl ? 'text-right' : 'text-left'
         }`}
       >
         {/* Success Icon */}
         <div className="flex justify-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-green-50 rounded-full flex items-center justify-center">
             <svg
               className="w-10 h-10 text-green-600"
               fill="none"
@@ -70,7 +70,7 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
         {/* Title */}
         <div>
           <h2 className="text-2xl font-bold text-slate-900">
-            {lang === 'he' ? '🎉 פריסה הצליחה!' : '🎉 Deployment Successful!'}
+            {lang === 'he' ? 'הפריסה הצליחה' : 'Deployment Successful'}
           </h2>
           <p className="text-sm text-slate-500 mt-2">
             {lang === 'he'
@@ -94,10 +94,10 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
                 onClick={() => {
                   navigator.clipboard.writeText(projectId);
                 }}
-                className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
+                className="p-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
                 title="Copy ID"
               >
-                📋
+                {lang === 'he' ? 'העתק' : 'Copy'}
               </button>
             </div>
           </div>
@@ -178,8 +178,8 @@ const DeploymentSuccess: React.FC<DeploymentSuccessProps> = ({
         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-xs text-blue-800">
             {lang === 'he'
-              ? '💡 הקישור שלך זמין כעת ויכול להישמר ושתף עם חברים ומשפחה'
-              : '💡 Your link is now live and can be saved and shared with friends and family'}
+              ? 'הקישור שלך זמין כעת וניתן לשמור ולשתף עם חברים ומשפחה'
+              : 'Your link is now live and can be saved and shared with friends and family'}
           </p>
         </div>
       </div>

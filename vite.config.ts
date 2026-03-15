@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 5173,
         host: '0.0.0.0',
+        headers: {
+          'Cache-Control': 'no-store',
+        },
         proxy: {
           '/api': {
             target: env.VITE_SERVER_URL || 'http://localhost:5000',
@@ -15,6 +18,9 @@ export default defineConfig(({ mode }) => {
             rewrite: (path) => path,
           }
         }
+      },
+      optimizeDeps: {
+        force: true,
       },
       plugins: [react()],
       define: {

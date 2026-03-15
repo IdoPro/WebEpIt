@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { SiteConfig, Language, Milestone } from '@/types';
-import { APP_NAME, DECEASED_NAME, YEARS_LIFE, HEBREW_YEARS, MOTTO } from '@/components/Memorial-Web/constants';
 import InputField from '@/components/Step2/components/GenericInputField';
 
 const CONCEPT_PALETTES = [
@@ -66,9 +65,9 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
   return (
     <div className="space-y-6">
       {/* Contact Information Section */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
-        <h3 className="text-sm font-bold text-blue-900">
-          {lang === 'he' ? '📧 פרטי יצירת קשר' : '📧 Contact Information'}
+      <div className="bg-white/90 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-900 tracking-wide">
+          {lang === 'he' ? 'פרטי יצירת קשר' : 'Contact Information'}
         </h3>
         
         <InputField
@@ -88,7 +87,7 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
           type="email"
         />
         
-        <p className="text-xs text-blue-700 italic">
+        <p className="text-xs text-slate-500 italic">
           {lang === 'he' 
             ? '✓ נשתמש באימייל זה כדי לשמור על ההרשאות שלך ולשלוח עדכונים חשובים'
             : '✓ We\'ll use this email to save your site access and send important updates'}
@@ -123,9 +122,9 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
         isRtl={isRtl}
       />
 
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-4">
+      <div className="p-5 bg-white/90 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">{lang === 'he' ? '🎨 קונספט' : '🎨 Concept'}</h3>
+          <h3 className="text-sm font-bold text-slate-900 tracking-wide">{lang === 'he' ? 'קונספט' : 'Concept'}</h3>
           <p className="text-xs text-slate-500 mt-1">
             {lang === 'he' ? 'בחרו פלטת צבעים לאתר או התאימו ידנית' : 'Pick a site palette or customize manually'}
           </p>
@@ -148,7 +147,7 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
                   })
                 }
                 className={`p-3 rounded-xl border text-right transition-all ${
-                  isSelected ? 'border-slate-900 ring-2 ring-slate-200' : 'border-slate-200 hover:border-slate-300'
+                  isSelected ? 'border-indigo-600 ring-2 ring-indigo-100' : 'border-slate-200 hover:border-slate-300'
                 }`}
               >
                 <div className="text-xs font-bold text-slate-800 mb-2">{palette.key}</div>
@@ -196,7 +195,7 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
       </div>
 
       {/* Memorial Image */}
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+      <div className="p-5 bg-white/90 rounded-2xl border border-slate-200 shadow-sm">
         <label className="block text-sm font-semibold text-slate-700 mb-3">
           {lang === 'he' ? 'תמונת זכרון' : 'Memorial Image'}
         </label>
@@ -218,8 +217,8 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
             file:py-2 file:px-4
             file:rounded-lg file:border-0
             file:text-sm file:font-semibold
-            file:bg-indigo-600 file:text-white
-            hover:file:bg-indigo-700
+            file:bg-slate-900 file:text-white
+            hover:file:bg-slate-800
             transition-colors"
         />
         {config.memorialImage && (
@@ -240,7 +239,7 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
         </h3>
 
         {/* Add New Milestone */}
-        <div className="space-y-3 mb-6 p-4 bg-slate-50 rounded-xl">
+        <div className="space-y-3 mb-6 p-5 bg-white/90 border border-slate-200 rounded-2xl shadow-sm">
           <InputField
             label={lang === 'he' ? 'שנה' : 'Year'}
             value={newMilestone.year}
@@ -261,7 +260,7 @@ const MemorialForm: React.FC<MemorialFormProps> = ({ lang, config, setConfig }) 
           />
           <button
             onClick={addMilestone}
-            className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors"
+            className="w-full px-4 py-2 bg-gradient-to-r from-slate-900 to-indigo-700 text-white text-sm font-bold rounded-lg hover:from-slate-800 hover:to-indigo-600 transition-colors"
           >
             {lang === 'he' ? '+ הוסף תחנה' : '+ Add Milestone'}
           </button>

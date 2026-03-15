@@ -138,22 +138,22 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 lg:grid-cols-12 gap-10 pb-20">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
 
       {/* Form Section */}
-      <div className="lg:col-span-7 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col h-[80vh]">
-        <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-white sticky top-0 z-10">
+      <div className="lg:col-span-7 bg-white/85 backdrop-blur rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.12)] border border-white/80 overflow-hidden flex flex-col h-[80vh]">
+        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white/90 sticky top-0 z-10">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">{t.customizeTitle}</h2>
-            <p className="text-slate-400 text-sm mt-1">{lang === 'he' ? 'בנו את ההנצחה בצורה אישית עם פרטים משמעותיים' : 'Build a personalized memorial with meaningful details'}</p>
+            <h2 className="text-2xl font-extrabold text-slate-900">{t.customizeTitle}</h2>
+            <p className="text-slate-500 text-sm mt-1">{lang === 'he' ? 'בנו את ההנצחה בצורה אישית עם פרטים משמעותיים' : 'Build a personalized memorial with meaningful details'}</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsAdvancedMode(!isAdvancedMode)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 isAdvancedMode
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-gradient-to-r from-slate-900 to-indigo-700 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
               title={lang === 'he' ? 'מצב מתקדם' : 'Advanced mode'}
             >
@@ -174,7 +174,7 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
           
         </div>
 
-        <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center bg-white/80 sticky bottom-0 gap-4">
+        <div className="p-8 border-t border-slate-100 flex justify-between items-center bg-white/95 sticky bottom-0 gap-4">
           {(loading || isDeploying) && (
             <div className="flex-1 max-w-xs bg-slate-900 rounded-xl p-3 font-mono text-[9px] text-emerald-400 overflow-hidden h-20 ltr">
               {logs.slice(-3).map((log, i) => <div key={i} className="opacity-70 animate-pulse truncate">{log}</div>)}
@@ -186,14 +186,14 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
               <button
                 onClick={handleGenerate}
                 disabled={loading}
-                className="px-8 py-3 bg-slate-600 text-white font-bold rounded-xl hover:bg-slate-700 transition-all shadow-lg disabled:opacity-50 flex items-center gap-2"
+                className="px-8 py-3 bg-slate-700 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 flex items-center gap-2"
               >
-                {lang === 'he' ? '✨ בנו' : '✨ Build'}
+                {lang === 'he' ? 'בנו' : 'Build'}
               </button>
               <button
                 onClick={handleDeploy}
                 disabled={isDeploying || loading}
-                className="px-10 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2 ml-auto"
+                className="px-10 py-3 bg-gradient-to-r from-slate-900 to-indigo-700 text-white font-bold rounded-xl hover:from-slate-800 hover:to-indigo-600 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2 ml-auto"
               >
                 {isDeploying ? (
                   <>
@@ -201,7 +201,7 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
                     {lang === 'he' ? 'יוצר...' : 'Creating...'}
                   </>
                 ) : (
-                  <>🕯️ {lang === 'he' ? 'פרוס הנצחה' : 'Launch Memorial'}</>
+                  <>{lang === 'he' ? 'פרוס הנצחה' : 'Launch Memorial'}</>
                 )}
               </button>
             </>
@@ -219,7 +219,7 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative group">
+        <div className="flex-1 bg-white/85 backdrop-blur rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.12)] border border-white/80 overflow-hidden relative group">
           
           
           <LivePreview config={config} lang={lang} />

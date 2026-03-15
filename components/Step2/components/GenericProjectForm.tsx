@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { SiteConfig, Language, PrototypeType } from '@/types';
-import { UI_STRINGS, COLORS, PROTOTYPES } from '@/constants';
+import { UI_STRINGS, PROTOTYPES } from '@/constants';
 import MemorialForm from '@/components/Step2/forms/MemorialForm';
 import InputField from './GenericInputField';
-import ColorPicker from './GenericColorPicker';
 
 
 interface ProjectFormProps {
@@ -96,31 +95,31 @@ const GenericProjectForm: React.FC<ProjectFormProps> = ({ lang, config, setConfi
 
       {/* Features & Integrations - Only in Advanced Mode */}
       {isAdvancedMode && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-slate-50 pt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-slate-100 pt-8">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-4">{t.features}</label>
+            <label className="block text-sm font-bold text-slate-800 mb-4">{t.features}</label>
             <div className="space-y-2">
               {PROTOTYPES.find(p => p.id === config.prototype)?.features[lang].map((f) => (
                 <label
                   key={f}
-                  className={`flex items-center gap-3 p-3 rounded-xl ring-1 ring-slate-100 hover:ring-indigo-200 hover:bg-indigo-50/30 cursor-pointer transition-all ${isRtl ? 'flex-row-reverse' : ''
+                  className={`flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 bg-white/80 hover:bg-indigo-50/30 cursor-pointer transition-all ${isRtl ? 'flex-row-reverse' : ''
                     }`}
                 >
                   <input
                     type="checkbox"
                     checked={config.features.includes(f)}
                     onChange={() => toggleFeature(f)}
-                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/40"
                   />
-                  <span className="text-xs font-semibold text-slate-600 flex-1">{f}</span>
+                  <span className="text-xs font-semibold text-slate-700 flex-1">{f}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <label className="block text-sm font-bold text-slate-700 mb-4">{t.integrations}</label>
-            <div className="space-y-3">
+          <div className="space-y-4 rounded-2xl border border-slate-100 bg-white/80 p-5 shadow-sm">
+            <label className="block text-sm font-bold text-slate-800">{t.integrations}</label>
+            <div className="space-y-4">
               <InputField
                 label="MongoDB URI (Optional)"
                 value={config.mongodbUri || ''}
