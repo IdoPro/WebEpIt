@@ -8,6 +8,18 @@ import Step1 from './components/Step1/Step1';
 import Step2 from './components/Step2/Step2';
 import Step3 from './components/steps/Step3';
 import { DeploymentResponse } from './services/projectService';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginScreen from './components/auth/LoginScreen';
+import MyMemorials from './components/dashboard/MyMemorials';
+import ManagementShell from './components/dashboard/ManagementShell';
+
+// ── App view state machine ──────────────────────────────────────────────────
+type AppView =
+  | { screen: 'public'; config: any }
+  | { screen: 'create' }
+  | { screen: 'my-sites' }
+  | { screen: 'manage'; memorialId: string }
+  | { screen: 'login' };
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('he');

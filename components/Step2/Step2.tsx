@@ -128,14 +128,14 @@ const Step2: React.FC<Step2Props> = ({ lang, setStep, config, setConfig, setResu
     }
   };
 
-  const toggleFeature = (feature: string) => {
-    setConfig(prev => ({
-      ...prev,
-      features: prev.features.includes(feature)
-        ? prev.features.filter(f => f !== feature)
-        : [...prev.features, feature]
-    }));
-  };
+  // const toggleFeature = (feature: string) => {
+  //   setConfig(prev => ({
+  //     ...prev,
+  //     features: prev.features.includes(feature)
+  //       ? prev.features.filter(f => f !== feature)
+  //       : [...prev.features, feature]
+  //   }));
+  // };
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
